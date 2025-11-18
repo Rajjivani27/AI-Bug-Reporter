@@ -1,0 +1,9 @@
+django
+django-crispy-forms
+djangorestframework
+django-cors-headers
+dj-rest-auth
+djangorestframework-simplejwt
+dj-rest-auth
+google-generativeai
+ipython
