@@ -1,0 +1,25 @@
+{
+    "manifest_version": 3,
+    "name" : "AI Bug Reporter",
+    "version": "1.0",
+    "description": "Automatically report website(frontend/backend) bugs and errors to a Django AI Backend",
+    "permissions": [
+        "tabs",
+        "scripting",
+        "activeTab"
+    ],
+    "host_permissions" : ["<all_urls>"],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts" : [
+        {
+            "matches" : ["<all_urls>"],
+            "js": ["content.js"]
+        }
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "AI Bug Reporter"
+    }
+}
