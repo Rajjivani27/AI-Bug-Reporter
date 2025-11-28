@@ -21,5 +21,6 @@ window.addEventListener("message", (event) => {
     if (event.data.type === "AI_BUG_REPORTER_ERROR") {
         console.log("[AI Bug Reporter] Error captured:", event.data.data);
         chrome.runtime.sendMessage({ action: "reportBug", data: event.data.data });
+        return;
     }
 });

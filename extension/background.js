@@ -23,7 +23,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 files: ["injected.js"]
             })
             .then(() => console.log("[BG] injected injected.js into tab", tid))
-            .catch(() => console.error("[BG] injection failed:", err));
+            .catch((err) => console.error("[BG] injection failed:", err));
         };
 
         if(tabId){
@@ -55,15 +55,39 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
             const bugReport = {
                 ...message.data,
-                screenshot: image,
             };
+
+            function dataURLtoBlob(dataURL){
+                const parts = dataURL.split(',');
+                const mimeMatch = parts[0].match(/:(.*?);/);
+                const mime = mimeMatch ? mimeMatch[1] : 'image/png';
+                const byteString = atob(parts[1]);
+                const len = byteString.length;
+                const u8arr = new Uint8Array(len);
+                for(let i = 0;i < len;i++){
+                    u8arr[i] = byteString.charCodeAt(i);
+                }
+
+                return new Blob([u8arr],{type : mime});
+            }
+
+            const screenshotBlob = dataURLtoBlob(image);
+
+            const formdata = new FormData();
+
+            Object.entries(bugReport).forEach(([key,value]) => {
+                if(value !== undefined && value !== null){
+                    formdata.append(key,String(value));
+                }
+            });
+
+            formdata.append("screenshot",screenshotBlob,"screenshot.png");
 
             console.log("[AI Bug Reporter] Sending bug to Django API...");
 
             fetch(DJANGO_API_URL, {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(bugReport),
+                body: formdata,
             })
             .then((res) => res.text().then(body => ({status: res.status,body})))
             .then((data) => console.log("[AI Bug Reporter] Bug Reported successfully:",data))
