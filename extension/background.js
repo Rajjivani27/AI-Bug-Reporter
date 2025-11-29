@@ -2,6 +2,14 @@ const DJANGO_API_URL = "http://127.0.0.1:8000/bug_reporter/";
 
 console.log("[BG] service worker loaded at", new Date().toISOString());
 
+function safeFileName(str){
+    return str
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g,"_")
+        .replace(/^_+|_+$/g,"")
+        .slice(0,50);
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log("[BG] onMessage received:", message, "sender:", sender);
 
@@ -47,11 +55,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if(message.action === "reportBug"){
         console.log("[AI Bug Reporter] Capturing screenshot..");
 
-        chrome.tabs.captureVisibleTab(null, {format: "png"}, (image) => {
+        const targetWindowId = (sender && sender.tab && sender.tab.windowId) ? sender.tab.windowId : null;
+
+        chrome.tabs.captureVisibleTab(targetWindowId, {format: "png"}, (image) => {
             if(chrome.runtime.lastError){
                 console.error("Screenshot capture failed:", chrome.runtime.lastError);
                 return;
             }
+
+            const errorMessage = message.data?.error_message || "error";
+
+            const safeName = safeFileName(errorMessage);
+            console.log("SafeFileName: ",safeName);
+
+            const ssFileName = `${safeName}.png`;
 
             const bugReport = {
                 ...message.data,
@@ -81,7 +98,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 }
             });
 
-            formdata.append("screenshot",screenshotBlob,"screenshot.png");
+            formdata.append("screenshot",screenshotBlob,ssFileName);
 
             console.log("[AI Bug Reporter] Sending bug to Django API...");
 
