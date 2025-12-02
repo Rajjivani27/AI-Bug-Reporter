@@ -22,24 +22,20 @@ def get_ai_summary(bug : BugReporter):
                     screenshot:{screenshot}\n
                     user_agent:{userAgent}\n  
                     Here are the details of a javascript runtime error , 
-                    give me answer in three separate lines and put \n at ending of every line, 
-                    first line should contain summary with heading Summary, 
-                    second line should contain severity of error from 1 to 5, 1 means low and 5 means high, only return a number as answer with Severity heading 
-                    and third line should contain suggestion to fix it with heading Suggestion and all suggestions should be continue"""
+                    give me answer in three separate lines,
+                    first line should contain just summary with no heading or nothing else, 
+                    second line should contain severity of error from 1 to 5, 1 means low and 5 means high, just return a number
+                    and third line should contain suggestion to fix it without any heading and all suggestions should be continue"""
     
     response = chat_session.send_message(question)
 
     lines = response.text.split("\n")
 
-    for line in lines:
-        if line.startswith('Suggestion'):
-            suggestion = line[12:]
-            bug.suggestion = suggestion
-        elif line.startswith('Severity'):
-            severity = line[10:]
-            bug.severity = severity
-        elif line.startswith('Summary'):
-            bug.ai_summary = line
+    print(lines)
+
+    bug.ai_summary = lines[0]
+    bug.severity = lines[1]
+    bug.suggestion = lines[2]
 
     bug.save()
 
