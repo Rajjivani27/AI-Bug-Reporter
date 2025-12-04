@@ -6,6 +6,16 @@ from rest_framework.response import Response
 from rest_framework import status
 from .utils import get_ai_summary
 
+class CustomUserViewSet(ModelViewSet):
+    def get_queryset(self):
+        return CustomUser.objects.all()
+    
+    def get_serializer(self, *args, **kwargs):
+        return CustomUserSerializer(*args,context=self.get_serializer_context(),**kwargs)
+    
+    def get_serializer_context(self):
+        return {'request':self.request}
+
 class BugReporterViewSet(ModelViewSet):
     def get_queryset(self):
         return BugReporter.objects.all()
@@ -14,7 +24,7 @@ class BugReporterViewSet(ModelViewSet):
         data = request.data
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
-        bug = serializer.save()
+        bug = serializer.save(user = request.user)
 
         get_ai_summary(bug)
 

@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,PermissionsMixin
 from .managers import *
 
-class CustomUser(models.Model):
+class CustomUser(AbstractBaseUser,PermissionsMixin):
     email = models.EmailField(unique=True)
     username = models.CharField(unique=True,max_length=50)
     is_active = models.BooleanField(default=True)
@@ -11,12 +11,13 @@ class CustomUser(models.Model):
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FEILDS = ['username']
+    REQUIRED_FIELDS = ['username']
 
     def __str__(self):
         return self.username
 
 class BugReporter(models.Model):
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
     error_message = models.TextField()
     stack_trace = models.TextField(null=True,blank=True)
     page_url = models.URLField()
