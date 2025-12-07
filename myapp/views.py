@@ -5,6 +5,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from .utils import get_ai_summary
+from rest_framework.permissions import AllowAny,IsAuthenticated
 
 class CustomUserViewSet(ModelViewSet):
     def get_queryset(self):
@@ -17,6 +18,11 @@ class CustomUserViewSet(ModelViewSet):
         return {'request':self.request}
 
 class BugReporterViewSet(ModelViewSet):
+    def get_permissions(self):
+        if self.action == "create":
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
     def get_queryset(self):
         return BugReporter.objects.all()
     

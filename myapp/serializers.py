@@ -30,5 +30,5 @@ class CustomUserSerializer(serializers.ModelSerializer):
 class BugReporterSerializer(serializers.ModelSerializer):
     class Meta:
         model = BugReporter
-        fields = "__all__"
+        fields = ["error_message","stack_trace","page_url","user_agent","screenshot","ai_summary","severity","suggestion"]
 
