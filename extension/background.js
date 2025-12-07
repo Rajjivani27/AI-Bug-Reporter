@@ -12,6 +12,14 @@ function safeFileName(str = ""){
         .slice(0,50) || "error";
 }
 
+async function getToken(){
+    return new Promise((resolve) => {
+        chrome.storage.sync.get(["accessToken"], (data) => {
+            resolve(data.accessToken || null);
+        });
+    });
+}
+
 function dataURLToBlob(dataURL){
     const parts = dataURL.split(",");
     const mimeMatch = parts[0].match(/:(.*?);/);
@@ -186,6 +194,15 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
 
                 const screenshotBlob = dataURLToBlob(imageDataUrl);
 
+                const token = await getToken();
+                if(!token){
+                    console.error("Not logged in - cannot send bug report");
+                    return;
+                }
+                else{
+                    console.log("Token:",token)
+                }
+
                 const formData = new FormData();
 
                 if(message.data && typeof message.data === "object"){
@@ -213,6 +230,9 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
                 try{
                     const resp = await fetch(DJANGO_API_URL, {
                         method:"POST",
+                        headers: {
+                            Authorization: `Bearer ${token}`, //JWT here
+                        },
                         body:formData
                     });
 
