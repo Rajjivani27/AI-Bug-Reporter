@@ -1,8 +1,34 @@
 const DJANGO_API_URL = "http://127.0.0.1:8000/bug_reporter/";
+const DJANGO_REFRESH_API_URL = "http://127.0.0.1:8000/api/token/refresh/";
 
 const ext = (typeof browser !== "undefined") ? browser : chrome;
 
 console.log("[BG2] service worker loaded at:", new Date().toISOString());
+
+async function isTokenExpired(token){
+    if(!token) return true;
+
+    try{
+        const base64Url = token.split('.')[1];
+        if(!base64Url) return true;
+
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g,'/');
+
+        const payloadJson = atob(base64);
+        const payload = JSON.parse(payloadJson)
+
+        if(!payload.exp){
+            return true;
+        }
+
+        const nowInSeconds = Math.floor(Date.now() / 1000);
+        return payload.exp < nowInSeconds;
+    }
+    catch(e){
+        console.error("Failed to parse token:",e);
+        return true;
+    }
+}
 
 function safeFileName(str = ""){
     return String(str)
@@ -12,10 +38,18 @@ function safeFileName(str = ""){
         .slice(0,50) || "error";
 }
 
-async function getToken(){
+async function getAccessToken(){
     return new Promise((resolve) => {
         chrome.storage.sync.get(["accessToken"], (data) => {
             resolve(data.accessToken || null);
+        });
+    });
+}
+
+async function getRefreshToken(){
+    return new Promise((resolve) => {
+        chrome.storage.sync.get(["refreshToken"],(data) => {
+            resolve(data.refreshToken || null);
         });
     });
 }
@@ -194,13 +228,49 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
 
                 const screenshotBlob = dataURLToBlob(imageDataUrl);
 
-                const token = await getToken();
-                if(!token){
+                let accessToken = await getAccessToken();
+                if(!accessToken){
                     console.error("Not logged in - cannot send bug report");
                     return;
                 }
-                else{
-                    console.log("Token:",token)
+
+                if(isTokenExpired(accessToken)){
+                    const refreshToken = await getRefreshToken();
+
+                    if(!refreshToken){
+                        console.error("No refresh token - please log in again");
+                        return;
+                    }
+                    try{
+                        const res = await fetch(DJANGO_REFRESH_API_URL, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ refresh: refreshToken }),
+                        })
+
+                        if(!res.ok){
+                            console.error(res);
+                            return;
+                        }
+
+                        const data = await res.json();
+
+                        await chrome.storage.sync.set({
+                            accessToken: data.access,
+                            refreshToken: data.refresh,
+                        });
+
+                        document.getElementById("status").textContent = "Logged In!";
+                    }
+                    catch(e){
+                        console.error("Refresh Token API Failed:",e)
+                    }
+                }
+
+                accessToken = await getAccessToken();
+                if(!accessToken){
+                    console.error("Not logged in - cannot send bug report");
+                    return;
                 }
 
                 const formData = new FormData();
@@ -231,7 +301,7 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
                     const resp = await fetch(DJANGO_API_URL, {
                         method:"POST",
                         headers: {
-                            Authorization: `Bearer ${token}`, //JWT here
+                            Authorization: `Bearer ${accessToken}`, //JWT here
                         },
                         body:formData
                     });
