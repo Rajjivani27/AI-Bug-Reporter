@@ -11,10 +11,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+AUTH_USER_MODEL = "myapp.CustomUser"
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -26,21 +30,22 @@ SECRET_KEY = 'django-insecure-ji3hh%v5ax*flrs9bh4j$4k$wzeu5a*z7^^jj%4194zqam7z3$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'myapp',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'myapp',
     'rest_framework',
     'corsheaders',
+    "rest_framework_simplejwt.token_blacklist",
 ]
 
 MIDDLEWARE = [
@@ -55,6 +60,14 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "chrome-extension://lpcippbnlnfeghanjmliihpbkhohdohm"
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "chrome-extension://lpcippbnlnfeghanjmliihpbkhohdohm"
+]
 
 ROOT_URLCONF = 'ai_bug_reporter.urls'
 
@@ -75,6 +88,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ai_bug_reporter.wsgi.application'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    )
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=24),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
