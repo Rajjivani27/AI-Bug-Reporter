@@ -5,19 +5,30 @@ const ext = (typeof browser !== "undefined") ? browser : chrome;
 
 console.log("[BG2] service worker loaded at:", new Date().toISOString());
 
-async function isTokenExpired(token){
+function isTokenExpired(token){
     if(!token) return true;
+
+    if(typeof token === "string" && token.startsWith("Bearer ")){
+        token = token.slice(7);
+    }
 
     try{
         const base64Url = token.split('.')[1];
-        if(!base64Url) return true;
+        if(!base64Url){
+            console.log("First fail")
+            return true;
+        }
 
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g,'/');
+        let base64 = base64Url.replace(/-/g, "+").replace(/_/g,"/");
+
+        const pad = base64.length % 4;
+        if(pad) base64 += "=".repeat(4 - pad);
 
         const payloadJson = atob(base64);
         const payload = JSON.parse(payloadJson)
 
-        if(!payload.exp){
+        if(!payload || (typeof payload.exp !== "number" && typeof payload.exp !== "string")){
+            console.log("Second Fail");
             return true;
         }
 
@@ -235,21 +246,31 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
                 }
 
                 if(isTokenExpired(accessToken)){
+                    console.log("Access Token expired, fetching new tokens from refresh API point");
                     const refreshToken = await getRefreshToken();
+                    console.log("Refresh Token:",refreshToken)
 
                     if(!refreshToken){
                         console.error("No refresh token - please log in again");
                         return;
                     }
                     try{
-                        const res = await fetch(DJANGO_REFRESH_API_URL, {
+                        const res = await fetch(`${DJANGO_REFRESH_API_URL}`, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ refresh: refreshToken }),
-                        })
+                        });
 
                         if(!res.ok){
                             console.error(res);
+                            const text = await res.text;
+                            console.log("Text:",text);
+                            try{
+                                console.log("Parsed JSON:", JSON.parse(text));
+                            }
+                            catch(e){
+                                console.log("Nothing , it was not json");
+                            }
                             return;
                         }
 
@@ -265,6 +286,9 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
                     catch(e){
                         console.error("Refresh Token API Failed:",e)
                     }
+                }
+                else{
+                    console.log("Access Token not expired, going ahead!!");
                 }
 
                 accessToken = await getAccessToken();
