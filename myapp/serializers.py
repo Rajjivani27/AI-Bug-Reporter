@@ -1,5 +1,6 @@
 from django.db import transaction
 from rest_framework import serializers
+from .utils import send_verification_email
 from .models import *
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -21,9 +22,12 @@ class CustomUserSerializer(serializers.ModelSerializer):
         validated_data.pop('password2')
         password = validated_data.pop('password')
 
+        validated_data['is_active'] = False
+
         user = CustomUser(**validated_data)
         user.set_password(password)
         user.save()
+        send_verification_email(user,self.context['request'])
 
         return user
 

@@ -5,6 +5,8 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from .utils import get_ai_summary
+from django.views.generic import TemplateView
+from django.contrib.auth.views import LogoutView
 from rest_framework.permissions import AllowAny,IsAuthenticated
 
 class CustomUserViewSet(ModelViewSet):
@@ -41,5 +43,18 @@ class BugReporterViewSet(ModelViewSet):
     
     def get_serializer_context(self):
         return {'request' : self.request}
+    
+class LogoutConfirmView(TemplateView):
+    template_name = "myapp/logout.html"
+
+class LogOutView(LogoutView):
+    http_method_names = ['post']
+    next_page = 'login'
+    
+def home(request):
+    return render(request,'myapp/home.html',{'title':'Home | AI Bug Reporter'})
+
+def login(request):
+    return render(request,"myapp/login.html",{'title':'Login | AI Bug Reporter'})
 
 # Create your views here.
