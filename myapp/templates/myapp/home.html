@@ -1,0 +1,99 @@
+{% extends "myapp/base.html" %}
+{% load static %}
+{% block content %}
+
+<section class="hero">
+  <div class="hero-text">
+    <div class="badge">Final Year Project · AI + Web Debugging</div>
+    <h1>Automatically capture frontend bugs with full context</h1>
+    <p>
+      AI Bug Reporter is a Chrome extension and Django-based backend system that
+      detects JavaScript errors in real time, captures screenshots, and sends
+      structured bug reports for faster debugging.
+    </p>
+    <div class="hero-buttons">
+      <a href="#workflow" class="btn-primary">How it Works</a>
+      <a href="#tech" class="btn-secondary">Tech Stack</a>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <small style="color:#9ca3af;">Live error stream</small>
+    </div>
+    <div class="logs">
+      <div class="log-info">[12:04:01] Connected to server...</div>
+      <div class="log-error">TypeError: Cannot read property 'length'</div>
+      <div class="log-info">at Dashboard.jsx:82</div>
+      <div class="log-info">Screenshot captured ✓</div>
+      <br>
+      <div class="log-error">ReferenceError: userData is not defined</div>
+      <div class="log-ai">AI Suggestion: Add null checks</div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <h2>Key Features</h2>
+  <p>Automated error detection and reporting with zero manual effort.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>⚡ Auto Error Capture</h3>
+      <p>Detects runtime JS errors and unhandled promise rejections automatically.</p>
+    </div>
+    <div class="card">
+      <h3>🖼 Screenshot Context</h3>
+      <p>Captures visible tab screenshots to provide visual context.</p>
+    </div>
+    <div class="card">
+      <h3>🌐 Django Backend</h3>
+      <p>Stores errors, metadata, and screenshots using REST APIs.</p>
+    </div>
+    <div class="card">
+      <h3>🤖 AI Ready</h3>
+      <p>Designed for AI-powered bug summarization and analysis.</p>
+    </div>
+  </div>
+</section>
+
+<section id="workflow">
+  <h2>How It Works</h2>
+  <p>Three-layer architecture from browser to backend.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>1️⃣ Browser Extension</h3>
+      <p>Injects listeners into web pages and captures errors.</p>
+    </div>
+    <div class="card">
+      <h3>2️⃣ Background Worker</h3>
+      <p>Captures screenshots and prepares bug reports.</p>
+    </div>
+    <div class="card">
+      <h3>3️⃣ Django API</h3>
+      <p>Receives, stores, and analyzes bug reports.</p>
+    </div>
+  </div>
+</section>
+
+<section id="tech">
+  <h2>Tech Stack</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Frontend</h3>
+      <p>Chrome Extension (MV3), JavaScript (ES6)</p>
+    </div>
+    <div class="card">
+      <h3>Backend</h3>
+      <p>Django, Django REST Framework</p>
+    </div>
+    <div class="card">
+      <h3>Tools</h3>
+      <p>Chrome DevTools, Git, Postman</p>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
