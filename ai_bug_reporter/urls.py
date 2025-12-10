@@ -23,7 +23,8 @@ from myapp import urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',include('myapp.urls'))
+    path('',include('myapp.urls')),
+    path('api-auth/', include('rest_framework.urls'))
 ]
 
 urlpatterns += staticfiles_urlpatterns()

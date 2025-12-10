@@ -153,6 +153,16 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_USER_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
 
 # Default primary key field type
