@@ -27,7 +27,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
         user = CustomUser(**validated_data)
         user.set_password(password)
         user.save()
-        send_verification_email(user,self.context['request'])
 
         return user
 

@@ -20,7 +20,7 @@ def send_verification_email(user,request):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = email_verification_token.make_token(user)
 
-    verification_link = request.build_absolute_url(
+    verification_link = request.build_absolute_uri(
         reverse('verify_email_confirm',kwargs={'uidb64':uid,'token':token})
     )
 

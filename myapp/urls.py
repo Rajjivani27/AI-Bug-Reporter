@@ -16,6 +16,9 @@ router.register(r"user",CustomUserViewSet,basename="user")
 
 urlpatterns = [
     path('home/',home,name="home"),
+    path('user/register/',user_register,name="user_register"),
+    path('user/verify_email_done/',verify_email_done,name="verify_email_done"),
+    path('user/verify_email_confirm/<uidb64>/<token>/',verify_email_confirm,name="verify_email_confirm"),
     path('login/',auth_views.LoginView.as_view(template_name = "myapp/login.html"),name="login"),
     path('logout/confirm/',LogoutConfirmView.as_view(),name="logout-confirm"),
     path('logout/',LogOutView.as_view(),name="logout"),
