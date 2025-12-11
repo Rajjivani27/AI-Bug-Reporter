@@ -1,0 +1,347 @@
+{% extends "myapp/base.html" %}
+
+{% load static %}
+
+{% block title %}Register | AI Bug Reporter {% endblock %}
+
+{% block extra_css %}
+
+<style>
+    .auth-wrapper {
+        min-height: calc(100vh - 140px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 16px;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 520px;
+        background: linear-gradient(180deg, rgba(15,23,42,0.95), rgba(2,6,23,0.95));
+        border-radius: 20px;
+        border: 1px solid rgba(148,163,184,0.25);
+        box-shadow: 0 20px 40px rgba(15,23,42,0.9), inset 0 1px 0 rgba(255,255,255,0.03);
+        padding: 28px 26px;
+    }
+
+    .auth-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: rgba(56,189,248,0.15);
+        color: #7dd3fc;
+        border: 1px solid rgba(56,189,248,0.4);
+        margin-bottom: 12px;
+    }
+
+    .auth-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #f9fafb;
+        margin-bottom: 6px;
+        text-align: center;
+    }
+
+    .auth-subtitle {
+        font-size: 14px;
+        color: #9ca3af;
+        margin-bottom: 18px;
+        text-align: center;
+    }
+
+    .form-label { font-size: 13px; color: #e5e7eb; margin-bottom: 6px; }
+    .form-control {
+        height: 44px;
+        background: rgba(15,23,42,0.98);
+        border: 1px solid rgba(148,163,184,0.35);
+        border-radius: 10px;
+        color: #f9fafb;
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+    .form-control::placeholder { color: #64748b; }
+    .form-control:focus {
+        background: rgba(15,23,42,1);
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79,70,229,0.45);
+        color: #ffffff;
+    }
+
+    .password-wrapper {
+        position: relative;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 12px;
+        top: 70%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        color: #9ca3af;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .toggle-password:hover {
+        color: #ffffff;
+    }
+    .toggle-password:focus { outline: none; box-shadow: none; }
+
+    .btn-auth-primary {
+        margin-top: 6px;
+        height: 44px;
+        background: linear-gradient(135deg,#4f46e5,#6366f1);
+        border: none;
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+    .btn-auth-primary:hover { box-shadow: 0 0 18px rgba(79,70,229,0.6); transform: translateY(-1px); }
+
+    .helper-text { font-size: 12px; color: #9ca3af; margin-top: 12px; text-align:center; }
+
+    .error-text { font-size: 12px; color: #fca5a5; margin-top: 6px; }
+    .alert-auth { font-size: 13px; padding: 10px 12px; border-radius: 10px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.5); color: #fecaca; margin-bottom: 14px; }
+
+    .success-auth { font-size: 13px; padding: 10px 12px; border-radius: 10px; background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.35); color: #bbf7d0; margin-bottom: 14px; }
+
+    @media (max-width: 480px) {
+        .auth-card { padding: 20px; }
+        .auth-title { font-size: 20px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+
+    <div class="text-center">
+      <div class="auth-badge">
+        <span>🐞</span>
+        <span>AI Bug Reporter · Create account</span>
+      </div>
+    </div>
+
+    <h1 class="auth-title">Create your account</h1>
+    <p class="auth-subtitle">Register to send and view bug reports, manage projects, and access AI suggestions.</p>
+
+    <!-- Global messages -->
+    <div id="global-messages" aria-live="polite" style="margin-bottom:10px;"></div>
+
+    <form id="register-form" novalidate>
+      <!-- Username -->
+      <div class="mb-3">
+        <label for="id_username" class="form-label">Username</label>
+        <input id="id_username" name="username" type="text" class="form-control" placeholder="Choose a username" required autocomplete="username" />
+        <div id="err_username" class="error-text" style="display:none;"></div>
+      </div>
+
+      <!-- Email -->
+      <div class="mb-3">
+        <label for="id_email" class="form-label">Email</label>
+        <input id="id_email" name="email" type="email" class="form-control" placeholder="you@example.com" required autocomplete="email" />
+        <div id="err_email" class="error-text" style="display:none;"></div>
+      </div>
+
+      <!-- Password -->
+      <div class="mb-3 password-wrapper">
+        <label for="id_password" class="form-label">Password</label>
+        <input id="id_password" name="password" type="password" class="form-control" placeholder="Create a password" required autocomplete="new-password" />
+        <button type="button" class="toggle-password" data-target="id_password">
+            <i class="bi bi-eye"></i>
+        </button>
+        <div id="err_password" class="error-text" style="display:none;"></div>
+      </div>
+
+      <!-- Password Confirm -->
+      <div class="mb-3 password-wrapper">
+        <label for="id_password_confirm" class="form-label">Confirm Password</label>
+        <input id="id_password_confirm" name="password_confirm" type="password" class="form-control" placeholder="Re-enter password" required autocomplete="new-password" />
+        <button type="button" class="toggle-password" data-target="id_password_confirm">
+            <i class="bi bi-eye"></i>
+        </button>
+        <div id="err_password_confirm" class="error-text" style="display:none;"></div>
+      </div>
+
+      <button id="submit-btn" type="submit" class="btn btn-auth-primary w-100">
+        <span id="btn-text">Create account</span>
+        <span id="btn-spinner" style="display:none; margin-left:8px;">⏳</span>
+      </button>
+    </form>
+
+    <p class="helper-text">
+      Already have an account?
+      <a href="{% url 'login' %}" style="color:#7dd3fc;">Sign in</a>
+    </p>
+
+  </div>
+</div>
+
+<script>
+/*
+  Register form behavior:
+  - Sends POST to REGISTER_URL (default: /api/register/)
+  - Includes CSRF header if cookie found
+  - Displays per-field errors and global messages
+  - On success, redirects to login page
+  - Adjust REGISTER_URL if your API endpoint differs
+*/
+
+(
+    function(){
+        const REGISTER_URL = 'http://127.0.0.1:8000/user/'; // <-- change to your real API endpoint if necessary
+        const REDIRECT_ON_SUCCESS = "{% url 'verify_email_done' %}"; // redirect after successful registration
+
+        // util: get cookie (for CSRF)
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+  // show messages
+    const globalMessages = document.getElementById('global-messages');
+    function showGlobal(type, message) {
+        globalMessages.innerHTML = '';
+        const d = document.createElement('div');
+        d.className = (type === 'error') ? 'alert-auth' : 'success-auth';
+        d.textContent = message;
+        globalMessages.appendChild(d);
+    }
+
+    function clearFieldErrors() {
+        ['username','email','password','password_confirm'].forEach(name=>{
+        const el = document.getElementById('err_' + name);
+        if (el) { el.style.display='none'; el.textContent=''; }
+        });
+    }
+
+    function showFieldErrors(errors) {
+        // errors expected as object like { field: [msg1, msg2], non_field_errors: [...] }
+        clearFieldErrors();
+        for (const key in errors) {
+        if (key === 'non_field_errors' || key === 'detail') {
+            showGlobal('error', Array.isArray(errors[key]) ? errors[key].join(' ') : errors[key]);
+            continue;
+        }
+        const el = document.getElementById('err_' + key) || document.getElementById('err_' + key.replace('password1','password').replace('password2','password_confirm'));
+        if (el) {
+            el.style.display = 'block';
+            el.innerHTML = Array.isArray(errors[key]) ? errors[key].join('<br>') : String(errors[key]);
+        } else {
+            // fallback to global
+            showGlobal('error', `${key}: ${errors[key]}`);
+        }
+        }
+    }
+
+    // password toggle
+    
+    document.querySelectorAll(".toggle-password").forEach(button => {
+        button.addEventListener("click", function () {
+            const input = document.getElementById(this.dataset.target);
+            const icon = this.querySelector("i");
+
+            if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("bi-eye");
+            icon.classList.add("bi-eye-slash");
+            } else {
+            input.type = "password";
+            icon.classList.remove("bi-eye-slash");
+            icon.classList.add("bi-eye");
+            }
+        });
+    });
+
+    // submit handler
+    const form = document.getElementById('register-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnSpinner = document.getElementById('btn-spinner');
+
+    form.addEventListener('submit', async function(e){
+        e.preventDefault();
+        clearFieldErrors();
+        globalMessages.innerHTML = '';
+
+        const payload = {
+            username: document.getElementById('id_username').value.trim(),
+            email: document.getElementById('id_email').value.trim(),
+            password: document.getElementById('id_password').value,
+            password2: document.getElementById('id_password_confirm').value
+        };
+
+        // client-side quick validation
+        if (!payload.username || !payload.email || !payload.password || !payload.password2) {
+            showGlobal('error', 'Please fill all fields.');
+            return;
+        }
+        if (payload.password !== payload.password2) {
+            showFieldErrors({ password2: ['Passwords do not match.']});
+            return;
+        }
+
+        // UI: disable button
+        submitBtn.disabled = true;
+        btnText.style.opacity = '0.6';
+        btnSpinner.style.display = 'inline-block';
+
+        try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            // include csrf if available (useful if your endpoint requires it)
+            const csrftoken = getCookie('csrftoken');
+            if (csrftoken) headers['X-CSRFToken'] = csrftoken;
+
+            const res = await fetch(REGISTER_URL, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(payload),
+                credentials: 'same-origin' // send cookies if any
+            });
+
+            const dataText = await res.text();
+            // try parse JSON, fallback to text
+            let data;
+            try { data = dataText ? JSON.parse(dataText) : {}; } catch (err) { data = { detail: dataText || res.statusText }; }
+
+            if (res.ok) {
+                // success: show message then redirect
+                showGlobal('success', data.detail || 'Account created successfully. Redirecting to login...');
+                // short delay so user sees message
+                setTimeout(()=> {
+                    window.location.href = REDIRECT_ON_SUCCESS;
+                }, 900);
+            } else {
+                // show errors
+                if (typeof data === 'object' && Object.keys(data).length) {
+                    showFieldErrors(data);
+                } else {
+                    showGlobal('error', data.detail || 'Registration failed. Please try again.');
+                }
+            }
+        } catch (err) {
+            showGlobal('error', 'Network error — please check your connection.');
+            console.error(err);
+        } finally {
+            submitBtn.disabled = false;
+            btnText.style.opacity = '1';
+            btnSpinner.style.display = 'none';
+        }
+    });
+})();
+</script>
+{% endblock %}
