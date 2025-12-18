@@ -5,6 +5,14 @@ const ext = (typeof browser !== "undefined") ? browser : chrome;
 
 console.log("[BG2] service worker loaded at:", new Date().toISOString());
 
+function showExpiryNotification() {
+    chrome.notifications.create({
+        type: "basic",
+        title: "AI Bug Reporter",
+        message: "Your session expired. Please log in again."
+    });
+}
+
 function isTokenExpired(token){
     if(!token) return true;
 
@@ -240,6 +248,7 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
                 const screenshotBlob = dataURLToBlob(imageDataUrl);
 
                 let accessToken = await getAccessToken();
+                console.log("Access Token:",accessToken);
                 if(!accessToken){
                     console.error("Not logged in - cannot send bug report");
                     return;
@@ -252,8 +261,17 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
 
                     if(!refreshToken){
                         console.error("No refresh token - please log in again");
+                        showExpiryNotification();
                         return;
                     }
+
+                    if(isTokenExpired(refreshToken)){
+                        console.log("Refresh token expired, log in again!!");
+                        showExpiryNotification();
+                        //await chrome.storage.sync.remove(["accessToken", "refreshToken"]);
+                        return;
+                    }
+
                     try{
                         const res = await fetch(`${DJANGO_REFRESH_API_URL}`, {
                             method: "POST",

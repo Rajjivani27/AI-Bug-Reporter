@@ -4,6 +4,7 @@
     "version": "1.0",
     "description": "Automatically report website(frontend/backend) bugs and errors to a Django AI Backend",
     "permissions": [
+        "notifications",
         "storage",
         "tabs",
         "scripting",
