@@ -320,7 +320,7 @@
 
             if (res.ok) {
                 // success: show message then redirect
-                showGlobal('success', data.detail || 'Account created successfully. Redirecting to login...');
+                showGlobal('success', data.detail || 'Account created successfully. Check you email for Email Verification');
                 // short delay so user sees message
                 setTimeout(()=> {
                     window.location.href = REDIRECT_ON_SUCCESS;
