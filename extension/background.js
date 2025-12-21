@@ -5,12 +5,16 @@ const ext = (typeof browser !== "undefined") ? browser : chrome;
 
 console.log("[BG2] service worker loaded at:", new Date().toISOString());
 
-function showExpiryNotification() {
-    chrome.notifications.create({
-        type: "basic",
-        title: "AI Bug Reporter",
-        message: "Your session expired. Please log in again."
-    });
+function showNotification(msg = "Your session expired, Please Log In Agian!!") {
+    chrome.notifications.create(
+        "ai-bug-reporter-auth-notification",
+        {
+            type: "basic",
+            iconUrl: chrome.runtime.getURL("icon.png"),
+            title: "AI Bug Reporter",
+            message: msg,
+        }
+    );
 }
 
 function isTokenExpired(token){
@@ -255,19 +259,20 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
                 }
 
                 if(isTokenExpired(accessToken)){
+                    showNotification("Access Token Expired.");
                     console.log("Access Token expired, fetching new tokens from refresh API point");
                     const refreshToken = await getRefreshToken();
                     console.log("Refresh Token:",refreshToken)
 
                     if(!refreshToken){
                         console.error("No refresh token - please log in again");
-                        showExpiryNotification();
+                        showNotification();
                         return;
                     }
 
                     if(isTokenExpired(refreshToken)){
                         console.log("Refresh token expired, log in again!!");
-                        showExpiryNotification();
+                        showNotification();
                         //await chrome.storage.sync.remove(["accessToken", "refreshToken"]);
                         return;
                     }
@@ -298,8 +303,6 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
                             accessToken: data.access,
                             refreshToken: data.refresh,
                         });
-
-                        document.getElementById("status").textContent = "Logged In!";
                     }
                     catch(e){
                         console.error("Refresh Token API Failed:",e)
