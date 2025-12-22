@@ -5,6 +5,15 @@ const ext = (typeof browser !== "undefined") ? browser : chrome;
 
 console.log("[BG2] service worker loaded at:", new Date().toISOString());
 
+async function showPageToast(tabId,message){
+    if(!tabId) return;
+
+    chrome.tabs.sendMessage(tabId, {
+        type: "SHOW_AUTH_TOAST",
+        message,
+    });
+}
+
 function showNotification(msg = "Your session expired, Please Log In Agian!!") {
     chrome.notifications.create(
         "ai-bug-reporter-auth-notification",
@@ -180,6 +189,8 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
 
     (async () => {
         try{
+            const tabId = sender?.tab?.id;
+
             if(!message || !message.action){
                 console.warn("[BG] received message with no action");
                 return;
@@ -187,8 +198,6 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
 
             if(message.action === "inject_page_script"){
                 console.log("[BG] inject_page_script request received");
-
-                const tabId = sender?.tab?.id;
 
                 if(tabId){
                     try{
@@ -254,25 +263,25 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
                 let accessToken = await getAccessToken();
                 console.log("Access Token:",accessToken);
                 if(!accessToken){
+                    await showPageToast(tabId,"Not Logged In- Please Log In");
                     console.error("Not logged in - cannot send bug report");
                     return;
                 }
 
                 if(isTokenExpired(accessToken)){
-                    showNotification("Access Token Expired.");
                     console.log("Access Token expired, fetching new tokens from refresh API point");
                     const refreshToken = await getRefreshToken();
                     console.log("Refresh Token:",refreshToken)
 
                     if(!refreshToken){
                         console.error("No refresh token - please log in again");
-                        showNotification();
+                        await showPageToast(tabId,"Not Logged In- Please Log In");
                         return;
                     }
 
                     if(isTokenExpired(refreshToken)){
                         console.log("Refresh token expired, log in again!!");
-                        showNotification();
+                        await showPageToast(tabId,"You did not show any activity in a while, Please Log In Again!!");
                         //await chrome.storage.sync.remove(["accessToken", "refreshToken"]);
                         return;
                     }
@@ -314,6 +323,7 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
 
                 accessToken = await getAccessToken();
                 if(!accessToken){
+                    await showPageToast(tabId,"Please Log In into Extension!!");
                     console.error("Not logged in - cannot send bug report");
                     return;
                 }
