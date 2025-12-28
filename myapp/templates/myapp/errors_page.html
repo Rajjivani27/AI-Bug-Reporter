@@ -1,0 +1,157 @@
+{% extends "myapp/base.html" %}
+
+{% load static %}
+
+{% block title %} Errors | AI Bug Reporter {% endblock %}
+
+{% block extra_css %}
+
+    <style>
+        /* body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+        } */
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            background: linear-gradient(135deg, #020617, #0f172a);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        thead {
+            background-color: #1e293b;
+            color: rgb(255, 255, 255);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #0e034e;
+        }
+
+        tr:hover {
+            color:black;
+            background-color: #f1f5f9;
+        }
+
+        .error-type {
+            font-weight: bold;
+            color: #dc2626;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 20px;
+            color: #555;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1>My Error Reports</h1>
+
+    <div class="container">
+        <div id="status" class="loading">Loading errors...</div>
+
+        <table id="errorTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Message</th>
+                    <th>URL</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody id="errorBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const API_URL = "http://127.0.0.1:8000/bug_reporter/"; 
+        // example: /api/errors/ → returns only logged-in user's errors
+
+        // const accessToken = localStorage.getItem("access_token");
+
+        // if (!accessToken) {
+        //     alert("User not authenticated!");
+        //     window.location.href = "/login.html";
+        // }
+
+        fetch(API_URL, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to fetch errors");
+            }
+            return response.json();
+        })
+        .then(data => {
+            const statusDiv = document.getElementById("status");
+            const table = document.getElementById("errorTable");
+            const tbody = document.getElementById("errorBody");
+
+            statusDiv.style.display = "none";
+
+            if (data.length === 0) {
+                statusDiv.textContent = "No errors found for this user.";
+                statusDiv.className = "no-data";
+                statusDiv.style.display = "block";
+                return;
+            }
+
+            table.style.display = "table";
+
+            data.forEach((error, index) => {
+                console.log("The full error object:",error)
+                console.log("The ID specifically:",error.id)
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>
+                        <a href="/bug_reporter/${error.id}/" class="error-link">
+                            ${error.error_message || "NA"}
+                        </a>
+                        
+                    </td>
+                    <td>${error.page_url || "N/A"}</td>
+                    <td>${new Date(error.created_at).toLocaleString()}</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        })
+        .catch(err => {
+            const statusDiv = document.getElementById("status");
+            statusDiv.textContent = "Something went wrong while loading errors.";
+            statusDiv.style.color = "red";
+            console.error(err);
+        });
+    </script>
+{% endblock %}
