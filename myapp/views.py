@@ -1,8 +1,9 @@
 from django.http import HttpResponse
 from django.utils.encoding import force_str
-from django.shortcuts import redirect
+from django.shortcuts import redirect,get_object_or_404
 from django.utils.http import urlsafe_base64_decode
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from .models import *
 from .serializers import *
 from .utils import email_verification_token
@@ -36,7 +37,7 @@ class CustomUserViewSet(ModelViewSet):
 
 class BugReporterViewSet(ModelViewSet):
     def get_permissions(self):
-        if self.action == "create":
+        if self.action == "create" or self.action == "list":
             return [IsAuthenticated()]
         return [AllowAny()]
 
@@ -52,6 +53,17 @@ class BugReporterViewSet(ModelViewSet):
         get_ai_summary(bug)
 
         return Response(serializer.data,status=status.HTTP_201_CREATED)
+    
+    def list(self, request, *args, **kwargs):
+        user = request.user
+
+        errors = BugReporter.objects.filter(user = user)
+
+        serializer = self.get_serializer(errors,many=True)
+
+        print(f"I am Here:{serializer.data}")
+
+        return Response(serializer.data,status=status.HTTP_200_OK)
     
     def get_serializer(self, *args, **kwargs):
         return BugReporterSerializer(*args,context=self.get_serializer_context(),**kwargs)
@@ -89,6 +101,10 @@ def verify_email_confirm(request,uidb64,token):
     
 def home(request):
     return render(request,'myapp/home.html',{'title':'Home | AI Bug Reporter'})
+
+@login_required(login_url="login")
+def errors_page(request):
+    return render(request,"myapp/errors_page.html")
 
 def login(request):
     return render(request,"myapp/login.html",{'title':'Login | AI Bug Reporter'})

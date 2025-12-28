@@ -27,3 +27,6 @@ class BugReporter(models.Model):
     severity = models.IntegerField(default=0)
     suggestion = models.TextField(null=True,blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.error_message

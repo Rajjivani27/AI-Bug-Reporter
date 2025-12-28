@@ -16,6 +16,7 @@ router.register(r"user",CustomUserViewSet,basename="user")
 
 urlpatterns = [
     path('home/',home,name="home"),
+    path('errors_page/',errors_page,name="errors_page"),
     path('user/register/',user_register,name="user_register"),
     path('user/verify_email_done/',verify_email_done,name="verify_email_done"),
     path('user/verify_email_confirm/<uidb64>/<token>/',verify_email_confirm,name="verify_email_confirm"),
