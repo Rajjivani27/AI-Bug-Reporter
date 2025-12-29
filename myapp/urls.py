@@ -1,3 +1,4 @@
+from ai_bug_reporter import settings
 from django.urls import path,include
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
@@ -17,6 +18,7 @@ router.register(r"user",CustomUserViewSet,basename="user")
 urlpatterns = [
     path('home/',home,name="home"),
     path('errors_page/',errors_page,name="errors_page"),
+    path('error_details/<int:id>/',error_details,name="error_details"),
     path('user/register/',user_register,name="user_register"),
     path('user/verify_email_done/',verify_email_done,name="verify_email_done"),
     path('user/verify_email_confirm/<uidb64>/<token>/',verify_email_confirm,name="verify_email_confirm"),
@@ -26,3 +28,9 @@ urlpatterns = [
     path('api/token/',TokenObtainPairView.as_view(),name="token_obtain_api"),
     path('api/token/refresh/',TokenRefreshView.as_view(),name="token_refresh_api"),
 ] + router.urls
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root = settings.MEDIA_ROOT
+    )

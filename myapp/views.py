@@ -106,6 +106,10 @@ def home(request):
 def errors_page(request):
     return render(request,"myapp/errors_page.html")
 
+@login_required(login_url="login")
+def error_details(request,id):
+    return render(request,"myapp/error_details.html",{"error_id":id})
+
 def login(request):
     return render(request,"myapp/login.html",{'title':'Login | AI Bug Reporter'})
 

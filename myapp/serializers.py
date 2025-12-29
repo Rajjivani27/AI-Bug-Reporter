@@ -31,6 +31,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         return user
 
 class BugReporterSerializer(serializers.ModelSerializer):
+    screenshot = serializers.ImageField(use_url = True)
     class Meta:
         model = BugReporter
         fields = "__all__"
