@@ -260,7 +260,7 @@
                 <a href="{% url 'home' %}">Home</a>
 
                 {% if user.is_authenticated %}
-                    <a href="#"> Dashboard </a>
+                    <a href="{% url 'errors_page' %}"> Dashboard </a>
                 {% endif %}
                 
 

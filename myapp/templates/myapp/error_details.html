@@ -1,0 +1,205 @@
+{% extends "myapp/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f1f5f9;
+            padding: 20px;
+        }
+
+        .container {
+            color:white;
+            max-width: 900px;
+            margin: auto;
+            background: linear-gradient(135deg, #030c34, #1a2b54);;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #f5f6f8;
+            margin-bottom: 6px;
+        }
+
+        .value {
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 6px;
+            word-break: break-word;
+            color: #0f172a;
+        }
+
+        .stack {
+            background: #020617;
+            color: #e5e7eb;
+            font-family: monospace;
+            white-space: pre-wrap;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .severity {
+            font-weight: bold;
+        }
+
+        .severity.low { color: #16a34a; }
+        .severity.medium { color: #ca8a04; }
+        .severity.high { color: #dc2626; }
+
+        img {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .loading, .error {
+            text-align: center;
+            font-size: 18px;
+            padding: 20px;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: #2563eb;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+        <div class="container">
+
+        <a href="/errors_page/" class="back-btn">← Back to My Errors</a>
+
+        <h1>Error Details</h1>
+
+        <div id="status" class="loading">Loading error details...</div>
+
+        <div id="details" style="display:none;">
+
+            <div class="field">
+                <div class="label">Error Message</div>
+                <div class="value" id="error_message"></div>
+            </div>
+
+            <div class="field">
+                <div class="label">Stack Trace</div>
+                <div class="stack" id="stack_trace"></div>
+            </div>
+
+            <div class="field">
+                <div class="label">Page URL</div>
+                <div class="value" id="page_url"></div>
+            </div>
+
+            <div class="field">
+                <div class="label">User Agent</div>
+                <div class="value" id="user_agent"></div>
+            </div>
+
+            <div class="field">
+                <div class="label">Screenshot</div>
+                <div id="screenshot_container"></div>
+            </div>
+
+            <div class="field">
+                <div class="label">AI Summary</div>
+                <div class="value" id="ai_summary"></div>
+            </div>
+
+            <div class="field">
+                <div class="label">Severity</div>
+                <div class="value severity" id="severity"></div>
+            </div>
+
+            <div class="field">
+                <div class="label">Suggestion</div>
+                <div class="value" id="suggestion"></div>
+            </div>
+
+            <div class="field">
+                <div class="label">Created At</div>
+                <div class="value" id="created_at"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://127.0.0.1:8000/bug_reporter/{{ error_id }}/";
+
+        function getSeverityText(value) {
+            if (value >= 7) return ["High", "high"];
+            if (value >= 4) return ["Medium", "medium"];
+            return ["Low", "low"];
+        }
+
+        fetch(API_BASE_URL, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Failed to fetch error");
+            return res.json();
+        })
+        .then(data => {
+            console.log(data.screenshot)
+            document.getElementById("status").style.display = "none";
+            document.getElementById("details").style.display = "block";
+
+            document.getElementById("error_message").textContent = data.error_message || "-";
+            document.getElementById("stack_trace").textContent = data.stack_trace || "No stack trace available";
+            document.getElementById("page_url").textContent = data.page_url || "-";
+            document.getElementById("user_agent").textContent = data.user_agent || "-";
+            document.getElementById("ai_summary").textContent = data.ai_summary || "Not generated yet";
+            document.getElementById("suggestion").textContent = data.suggestion || "No suggestion available";
+
+            const [severityText, severityClass] = getSeverityText(data.severity);
+            const severityEl = document.getElementById("severity");
+            severityEl.textContent = `${severityText} (${data.severity})`;
+            severityEl.classList.add(severityClass);
+
+            document.getElementById("created_at").textContent =
+                new Date(data.created_at).toLocaleString();
+
+            const screenshotContainer = document.getElementById("screenshot_container");
+            if (data.screenshot) {
+                const img = document.createElement("img");
+                img.src = data.screenshot;
+                screenshotContainer.appendChild(img);
+            } else {
+                screenshotContainer.textContent = "No screenshot available";
+            }
+        })
+        .catch(err => {
+            const status = document.getElementById("status");
+            status.textContent = "Unable to load error details";
+            status.className = "error";
+            console.error(err);
+        });
+    </script>
+{% endblock %}
