@@ -46,6 +46,9 @@ class BugReporterViewSet(ModelViewSet):
     
     def create(self, request, *args, **kwargs):
         data = request.data
+        print(f"Request Data:{data}")
+        user = request.user
+        print(f"User:{user}")
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         bug = serializer.save(user = request.user)

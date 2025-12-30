@@ -57,7 +57,7 @@ def get_ai_summary(bug : BugReporter):
 
     lines = response.text.split("\n")
 
-    print(lines)
+    # print(lines)
 
     bug.ai_summary = lines[0]
     bug.severity = lines[1]

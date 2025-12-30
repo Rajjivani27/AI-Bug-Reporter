@@ -34,5 +34,5 @@ class BugReporterSerializer(serializers.ModelSerializer):
     screenshot = serializers.ImageField(use_url = True)
     class Meta:
         model = BugReporter
-        fields = "__all__"
+        fields = ["id","error_message","stack_trace","page_url","user_agent","screenshot","ai_summary","severity","suggestion","created_at"]
 
