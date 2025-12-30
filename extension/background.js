@@ -322,10 +322,14 @@ chrome.runtime.onMessage.addListener((message,sender,sendResponse) => {
                 }
 
                 accessToken = await getAccessToken();
+                console.log("Reached Here");
                 if(!accessToken){
                     await showPageToast(tabId,"Please Log In into Extension!!");
                     console.error("Not logged in - cannot send bug report");
                     return;
+                }
+                else{
+                    console.log("Access not expired:",accessToken);
                 }
 
                 const formData = new FormData();

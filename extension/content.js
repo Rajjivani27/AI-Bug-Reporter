@@ -1,7 +1,7 @@
 console.log("Content script loaded successfully");
 
 function showAuthToast(message){
-    if(document.getElementById("ai-bug-toast")) return;
+    // if(document.getElementById("ai-bug-toast")) return;
 
     const toast = document.createElement("div");
     toast.id = "ai-bug-toast";
